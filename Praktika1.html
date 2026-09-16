@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeneSync — AI-платформа предиктивного долголетия и биохакинга</title>
+  <meta name="description" content="Управляйте вашим биологическим возрастом, ДНК-маркерами и рисками для здоровья с помощью ИИ.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       1. ДИЗАЙН-СИСТЕМА И СБРОС (Cyberpunk BioTech Theme)
+       ========================================================================== */
+    :root {
+      --bg-dark: #050811;
+      --bg-card: rgba(13, 20, 36, 0.65);
+      --bg-card-hover: rgba(18, 28, 50, 0.85);
+      --border-card: rgba(0, 240, 255, 0.12);
+      
+      --accent-cyan: #00f0ff;
+      --accent-cyan-glow: rgba(0, 240, 255, 0.4);
+      --accent-purple: #8a2be2;
+      --accent-purple-glow: rgba(138, 43, 226, 0.4);
+      --accent-emerald: #00ffaa;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --font-heading: 'Space Grotesk', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      
+      --glass-blur: blur(20px);
+      --transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      --radius-sm: 10px;
+      --radius-md: 18px;
+      --radius-lg: 28px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: var(--font-body);
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+    }
+
+    body {
+      overflow-x: hidden;
+      line-height: 1.6;
+      background: 
+        radial-gradient(circle at 10% 15%, rgba(138, 43, 226, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 85%, rgba(0, 240, 255, 0.12) 0%, transparent 45%),
+        var(--bg-dark);
+      background-attachment: fixed;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Glassmorphism Карточки */
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(0, 240, 255, 0.35);
+      box-shadow: 0 12px 40px rgba(0, 240, 255, 0.15);
+      transform: translateY(-4px);
+    }
+
+    /* Типографика */
+    h1, h2, h3, .heading-font {
+      font-family: var(--font-heading);
+    }
+
+    .section-title {
+      font-size: 2.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto 60px auto;
+      font-size: 1.1rem;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Кнопки */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 32px;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      text-decoration: none;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      color: #fff;
+      box-shadow: 0 0 25px var(--accent-cyan-glow);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 35px var(--accent-cyan-glow);
+      transform: scale(1.03);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: var(--glass-blur);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.05);
+    }
+
+    /* ==========================================================================
+       2. ШАПКА НАВИГАЦИИ (HEADER)
+       ========================================================================== */
+    .header {
+      position: fixed;
+      top: 0; left: 0; width: 100%;
+      z-index: 1000;
+      padding: 20px 0;
+      transition: var(--transition);
+    }
+
+    .header.scrolled {
+      background: rgba(5, 8, 17, 0.85);
+      backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 14px 0;
+    }
+
+    .header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      font-family: var(--font-heading);
+    }
+
+    .logo-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 0 15px var(--accent-cyan-glow);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-cyan);
+    }
+
+    /* ==========================================================================
+       3. HERO-СЕКЦИЯ С 3D-ДНК CANVAS И СКУАНЕРОМ
+       ========================================================================== */
+    .hero {
+      padding: 170px 0 100px 0;
+      position: relative;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .hero-content h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+
+    .hero-content p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 36px;
+      max-width: 540px;
+    }
+
+    /* Контейнер интерактивного ИИ-сканера */
+    .biomarker-widget {
+      padding: 36px;
+      position: relative;
+    }
+
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .widget-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .slider-group {
+      margin-bottom: 22px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .range-slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 12px var(--accent-cyan-glow);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .range-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* AI Результат аналитики */
+    .ai-output-box {
+      margin-top: 28px;
+      padding: 20px;
+      background: rgba(5, 8, 17, 0.7);
+      border-left: 4px solid var(--accent-cyan);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      transition: var(--transition);
+    }
+
+    .output-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .age-badge {
+      font-size: 1.4rem;
+      font-weight: 800;
+      font-family: var(--font-heading);
+    }
+
+    /* 3D Canvas ДНК */
+    .dna-canvas-container {
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 240px;
+      height: 240px;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    /* ==========================================================================
+       4. СЕКЦИЯ ВОЗМОЖНОСТЕЙ (FEATURES)
+       ========================================================================== */
+    .features {
+      padding: 100px 0;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 28px;
+    }
+
+    .feature-card {
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .feature-icon-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: var(--accent-cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+    }
+
+    .feature-card h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* ==========================================================================
+       5. СЕКЦИЯ ТАРИФОВ (PRICING)
+       ========================================================================== */
+    .pricing {
+      padding: 100px 0;
+    }
+
+    .pricing-toggle-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 50px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 60px;
+      height: 32px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 34px;
+      cursor: pointer;
+      transition: .4s;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 24px;
+      width: 24px;
+      left: 3px;
+      bottom: 3px;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan-glow);
+      border-radius: 50%;
+      transition: .4s;
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(28px);
+      background: #fff;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 32px;
+    }
+
+    .price-card {
+      padding: 44px 36px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .price-card.popular {
+      border-color: var(--accent-cyan);
+      background: linear-gradient(180deg, rgba(0, 240, 255, 0.08) 0%, rgba(13, 20, 36, 0.9) 100%);
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .price-val {
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 20px 0;
+      font-family: var(--font-heading);
+    }
+
+    .price-val span {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-weight: 400;
+    }
+
+    .price-features {
+      list-style: none;
+      margin: 24px 0 36px 0;
+      flex-grow: 1;
+    }
+
+    .price-features li {
+      margin-bottom: 12px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .price-features li::before {
+      content: "✓";
+      color: var(--accent-cyan);
+      font-weight: bold;
+    }
+
+    /* ==========================================================================
+       6. ПОДВАЛ (FOOTER)
+       ========================================================================== */
+    .footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 80px 0 30px 0;
+      background: rgba(3, 5, 12, 0.95);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr;
+      gap: 40px;
+      margin-bottom: 50px;
+    }
+
+    .footer-brand p {
+      color: var(--text-muted);
+      margin-top: 16px;
+      font-size: 0.9rem;
+      max-width: 320px;
+    }
+
+    .footer-links-title {
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: #fff;
+      font-family: var(--font-heading);
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-cyan);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 992px) {
+      .hero-grid { grid-template-columns: 1fr; text-align: center; }
+      .hero-content p { margin-left: auto; margin-right: auto; }
+      .nav-links { display: none; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .hero-content h1 { font-size: 2.5rem; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ШАПКА -->
+  <header class="header" id="header">
+    <div class="container">
+      <a href="#" class="logo">
+        <div class="logo-badge">🧬</div>
+        <span>GeneSync</span>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#about">О технологии</a></li>
+          <li><a href="#features">Возможности</a></li>
+          <li><a href="#pricing">Тарифы</a></li>
+        </ul>
+      </nav>
+
+      <a href="#pricing" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.9rem;">Вход в систему</a>
+    </div>
+  </header>
+
+  <!-- HERO СЕКЦИЯ С 3D-ДНК CANVAS И ИИ-СКАНЕРОМ -->
+  <section class="hero" id="about">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <h1>Синхронизируй ДНК и ИИ для <span class="gradient-text">управления долголетием</span></h1>
+        <p>Предиктивная биоплатформа GeneSync сопоставляет данные эпигенетических часов, анализов крови и непрерывных биомаркеров для полного замедления биологического старения.</p>
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+          <a href="#pricing" class="btn btn-primary">Запустить ИИ-Анализ →</a>
+          <a href="#features" class="btn btn-secondary">Научный протокол</a>
+        </div>
+      </div>
+
+      <!-- ИНТЕРАКТИВНЫЙ ИИ-СКАНЕР -->
+      <div class="glass-card biomarker-widget">
+        <!-- Анимированный Canvas с 3D ДНК на фоне -->
+        <div class="dna-canvas-container">
+          <canvas id="dnaCanvas" width="240" height="240"></canvas>
+        </div>
+
+        <div class="widget-header">
+          <div class="widget-title">
+            <div class="live-dot"></div>
+            <span>ИИ-Симулятор Биологического Возраста</span>
+          </div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Паспортный возраст:</span>
+            <strong id="ageVal">35 лет</strong>
+          </div>
+          <input type="range" min="20" max="75" value="35" class="range-slider" id="ageInput">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Средний уровень глубокого сна (%):</span>
+            <strong id="sleepVal">18%</strong>
+          </div>
+          <input type="range" min="5" max="35" value="18" class="range-slider" id="sleepInput">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Маркер системного воспаления (hs-CRP):</span>
+            <strong id="crpVal">1.5 мг/л</strong>
+          </div>
+          <input type="range" min="0.2" max="5.0" step="0.1" value="1.5" class="range-slider" id="crpInput">
+        </div>
+
+        <!-- Результат с динамическим био-возрастом -->
+        <div class="ai-output-box">
+          <div class="output-status">
+            <span style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 700; text-transform: uppercase;">Прогноз биологического возраста:</span>
+          </div>
+          <div class="age-badge" id="bioAgeResult">Расчёт...</div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;" id="aiRecommendation">Сканирование ваших биомаркеров...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ВОЗМОЖНОСТИ ПЛАТФОРМЫ -->
+  <section class="features" id="features">
+    <div class="container">
+      <h2 class="section-title">Предиктивные Биотехнологии</h2>
+      <p class="section-subtitle">Переход от реактивной медицины к непрерывному управлению биологическими ресурсами человека.</p>
+
+      <div class="features-grid">
+        <div class="glass-card feature-card">
+          <div class="feature-icon-box">🧬</div>
+          <h3>ДНК-Декодирование</h3>
+          <p>Интерпретация 700 000+ генетических маркеров для персонального подбора питания и защиты от наследственных рисков.</p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon-box">⏱️</div>
+          <h3>Эпигенетический Трекер</h3>
+          <p>Оценка метилирования ДНК по алгоритмам Хорвата для вычисления реального темпа клеточного старения.</p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon-box">🤖</div>
+          <h3>ИИ-НейроКонсультант</h3>
+          <p>Автоматическая корректировка суточных доз нутрицевтиков и БАД на основе показателей Apple Health / Oura / Garmin.</p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon-box">🩸</div>
+          <h3>Маркер-Предиктор</h3>
+          <p>Ранняя диагностика метаболических нарушений за 3–5 лет до проявления первых клинических симптомов.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ТАРИФНЫЕ ПЛАНЫ -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <h2 class="section-title">Планы Инвестиций в Долголетие</h2>
+      <p class="section-subtitle">Выберите необходимый уровень детализации вашего био-мониторинга.</p>
+
+      <div class="pricing-toggle-wrap">
+        <span style="font-weight: 600;">Оплата помесячно</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="pricingToggle">
+          <span class="toggle-slider"></span>
+        </label>
+        <span style="font-weight: 600;">Оплата за год <span style="color: var(--accent-cyan); font-size: 0.8rem;">(-20%)</span></span>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Тариф Free / Base -->
+        <div class="glass-card price-card">
+          <h3>Bio-Base</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Для начального мониторинга</p>
+          <div class="price-val" id="priceBase">$19 <span>/ мес</span></div>
+          <ul class="price-features">
+            <li>Интеграция со смарт-устройствами</li>
+            <li>Базовый дайджест биоритмов</li>
+            <li>Расчет биологического возраста</li>
+          </ul>
+          <button class="btn btn-secondary">Подключить</button>
+        </div>
+
+        <!-- Тариф Pro (Популярный) -->
+        <div class="glass-card price-card popular">
+          <div class="popular-badge">Рекомендуемый</div>
+          <h3>Gene-Pro</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Полный ИИ-биохакинг</p>
+          <div class="price-val" id="pricePro">$49 <span>/ мес</span></div>
+          <ul class="price-features">
+            <li>Загрузка Raw Data ДНК-тестов</li>
+            <li>Предиктивные оповещения о рисках</li>
+            <li>Персональный Longevity-протокол БАД</li>
+            <li>Поддержка экспертов-генетиков</li>
+          </ul>
+          <button class="btn btn-primary">Активировать Gene-Pro</button>
+        </div>
+
+        <!-- Тариф Ultimate -->
+        <div class="glass-card price-card">
+          <h3>Longevity Elite</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Персональное курирование</p>
+          <div class="price-val" id="priceElite">$149 <span>/ мес</span></div>
+          <ul class="price-features">
+            <li>Все возможности Pro</li>
+            <li>Ежеквартальный анализ эпигенетики</li>
+            <li>Личный врач-биохакер 24/7</li>
+          </ul>
+          <button class="btn btn-secondary">Связаться с куратором</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ПОДВАЛ (FOOTER) -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo">
+            <div class="logo-badge">🧬</div>
+            <span>GeneSync</span>
+          </a>
+          <p>Интеллектуальная экосистема предиктивного здоровья и контроля биологических часов.</p>
+        </div>
+
+        <div>
+          <div class="footer-links-title">Платформа</div>
+          <ul class="footer-links">
+            <li><a href="#about">О технологии</a></li>
+            <li><a href="#features">Возможности</a></li>
+            <li><a href="#pricing">Тарифы</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-links-title">Безопасность</div>
+          <ul class="footer-links">
+            <li><a href="#">Шифрование ДНК</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">HIPAA Compliance</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-links-title">Рассылка</div>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Получайте последние исследования по продлению жизни.</p>
+          <input type="email" placeholder="Ваш email..." style="width: 100%; padding: 10px 16px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; outline: none;">
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 GeneSync Inc. Все права защищены. Персональные данные шифруются по стандарту AES-256.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       JAVASCRIPT: ИИ-СИМУЛЯТОР, 3D CANVAS ДНК И ПЕРЕКЛЮЧАТЕЛЬ ЦЕН
+       ========================================================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      /* ------------------------------------------------------------------------
+         1. ПЛАВНОЕ ИЗМЕНЕНИЕ ШАПКИ ПРИ СКРОЛЛЕ
+         ------------------------------------------------------------------------ */
+      const header = document.getElementById('header');
+      window.addEventListener('scroll', () => {
+        header.classList.toggle('scrolled', window.scrollY > 40);
+      });
+
+      /* ------------------------------------------------------------------------
+         2. ИНТЕРАКТИВНЫЙ ИИ-СИМУЛЯТОР БИОМАРКЕРОВ
+         ------------------------------------------------------------------------ */
+      const ageInput = document.getElementById('ageInput');
+      const sleepInput = document.getElementById('sleepInput');
+      const crpInput = document.getElementById('crpInput');
+
+      const ageVal = document.getElementById('ageVal');
+      const sleepVal = document.getElementById('sleepVal');
+      const crpVal = document.getElementById('crpVal');
+
+      const bioAgeResult = document.getElementById('bioAgeResult');
+      const aiRecommendation = document.getElementById('aiRecommendation');
+
+      function calculateBioAge() {
+        const chronologicalAge = parseInt(ageInput.value);
+        const sleep = parseInt(sleepInput.value);
+        const crp = parseFloat(crpInput.value);
+
+        ageVal.textContent = `${chronologicalAge} лет`;
+        sleepVal.textContent = `${sleep}%`;
+        crpVal.textContent = `${crp} мг/л`;
+
+        // Формула ИИ-расчета
+        let delta = 0;
+        if (sleep < 15) delta += 3.5;
+        else if (sleep > 22) delta -= 2.5;
+
+        if (crp > 2.0) delta += (crp * 1.8);
+        else if (crp < 0.8) delta -= 2.0;
+
+        const calculatedBioAge = Math.round((chronologicalAge + delta) * 10) / 10;
+        const diff = Math.round((calculatedBioAge - chronologicalAge) * 10) / 10;
+
+        if (diff > 0) {
+          bioAgeResult.innerHTML = `${calculatedBioAge} <span style="font-size: 1rem; color: #ff5555;">(+${diff} лет к паспортному)</span>`;
+          aiRecommendation.textContent = "Обнаружен повышенный уровень системного воспаления. ИИ рекомендует добавить Омега-3 и увеличить фазу глубокого сна.";
+        } else {
+          bioAgeResult.innerHTML = `${calculatedBioAge} <span style="font-size: 1rem; color: var(--accent-cyan);">(${diff} лет моложе)</span>`;
+          aiRecommendation.textContent = "Ваши биомаркеры в отличном состоянии! Клеточный темп старения замедлен на 18%.";
+        }
+      }
+
+      [ageInput, sleepInput, crpInput].forEach(input => {
+        input.addEventListener('input', calculateBioAge);
+      });
+      calculateBioAge();
+
+      /* ------------------------------------------------------------------------
+         3. ТАРИФНЫЙ ПЕРЕКЛЮЧАТЕЛЬ (МЕСЯЦ / ГОД)
+         ------------------------------------------------------------------------ */
+      const pricingToggle = document.getElementById('pricingToggle');
+      const priceBase = document.getElementById('priceBase');
+      const pricePro = document.getElementById('pricePro');
+      const priceElite = document.getElementById('priceElite');
+
+      pricingToggle.addEventListener('change', () => {
+        if (pricingToggle.checked) {
+          priceBase.innerHTML = '$15 <span>/ мес</span>';
+          pricePro.innerHTML = '$39 <span>/ мес</span>';
+          priceElite.innerHTML = '$119 <span>/ мес</span>';
+        } else {
+          priceBase.innerHTML = '$19 <span>/ мес</span>';
+          pricePro.innerHTML = '$49 <span>/ мес</span>';
+          priceElite.innerHTML = '$149 <span>/ мес</span>';
+        }
+      });
+
+      /* ------------------------------------------------------------------------
+         4. HTML5 CANVAS 3D АНИМАЦИЯ СПИРАЛИ ДНК
+         ------------------------------------------------------------------------ */
+      const canvas = document.getElementById('dnaCanvas');
+      const ctx = canvas.getContext('2d');
+      let angle = 0;
+
+      function drawDNA() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const numNodes = 14;
+        const radius = 50;
+        const heightStep = 12;
+
+        for (let i = 0; i < numNodes; i++) {
+          const currentAngle = angle + (i * 0.4);
+          const y = (i - numNodes / 2) * heightStep + centerY;
+
+          // Первой цепи точка
+          const x1 = centerX + Math.cos(currentAngle) * radius;
+          const z1 = Math.sin(currentAngle) * radius;
+
+          // Второй цепи точка (противоположная)
+          const x2 = centerX + Math.cos(currentAngle + Math.PI) * radius;
+          const z2 = Math.sin(currentAngle + Math.PI) * radius;
+
+          // Отрисовка связывающей перемычки
+          ctx.beginPath();
+          ctx.moveTo(x1, y);
+          ctx.lineTo(x2, y);
+          ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 + (z1 + radius) / (2 * radius) * 0.3})`;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          // Точка 1
+          const scale1 = 0.6 + (z1 + radius) / (2 * radius) * 0.6;
+          ctx.beginPath();
+          ctx.arc(x1, y, 3 * scale1, 0, Math.PI * 2);
+          ctx.fillStyle = '#00f0ff';
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = '#00f0ff';
+          ctx.fill();
+
+          // Точка 2
+          const scale2 = 0.6 + (z2 + radius) / (2 * radius) * 0.6;
+          ctx.beginPath();
+          ctx.arc(x2, y, 3 * scale2, 0, Math.PI * 2);
+          ctx.fillStyle = '#8a2be2';
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = '#8a2be2';
+          ctx.fill();
+        }
+
+        angle += 0.03;
+        requestAnimationFrame(drawDNA);
+      }
+
+      drawDNA();
+    });
+  </script>
+</body>
+</html>
